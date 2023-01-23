@@ -1,0 +1,14 @@
+FROM ubuntu:22.04 AS template
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && \
+    apt-get dist-upgrade -qq && \
+    apt-get install -qq --no-install-recommends lsyncd openssh-client rsync && \
+    apt-get clean all && \
+    find /var/lib/apt/lists -type f -delete
+RUN mkdir -p /lsyncd
+COPY build/config.lua /lsyncd
+COPY build/wyga-entrypoint.sh /wyga-entrypoint.sh
+RUN chmod +x /wyga-entrypoint.sh
+FROM scratch
+COPY --from=template / /
+ENTRYPOINT [ "/wyga-entrypoint.sh" ]
