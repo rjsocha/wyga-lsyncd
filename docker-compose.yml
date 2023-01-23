@@ -21,6 +21,6 @@ services:
       SSHKEY2:  '<base64-priavate-ssh-key>'
       BACKUP1: 'ssh://backup1@server1/live-backup/'
       CONFIG1: 'SRC:/sync DST:ENV:BACKUP1 KEY:ENV:SSHKEY1 EXCLUDE:/tmp,/cache'
-      CONFIG2: 'SRC:/sync DST:ssh://bk2@srv2/path KEY:ENV:SSHKEY2 EXCLUDE:/tmp,/cache'
+      CONFIG2: 'SRC:/sync DST:ssh://backup2@server2/~/backup KEY:ENV:SSHKEY2 EXCLUDE:/tmp,/cache'
     volumes:
       - ./sync:/sync

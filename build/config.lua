@@ -99,10 +99,14 @@ for config in string.gmatch(configs,"[^,]+") do
   end
   syncus[idx].host=_host
 
+  -- fix home directory target
+  if string.find(_dst,"^/~/") then
+    _dst=string.sub(_dst,4)
+  end
+
   if string.len(_dst) < 1 then
     error(string.format('missing destination path in "DST" tag for configuration "%s"',config))
   end
-
   syncus[idx].target=_dst
 
   if syncus[idx].mode == "SSH" then
@@ -115,8 +119,10 @@ for config in string.gmatch(configs,"[^,]+") do
       _key_env = os.getenv(_ssh_key_env_name)
       if not _key_env then error(string.format('unable to locate SSH KEY environment variable (%s) for configuration "%s"',_ssh_key_env_name,config)) end
       math.randomseed(os.time())
-      random_file_name = tostring(math.random(1000000,9999999))
-      file_path = "/tmp/lsyncd-ssh-key-" .. random_file_name .. ".key"
+      repeat
+        random_file_name = tostring(math.random(1000000,9999999))
+        file_path = "/tmp/lsyncd-ssh-key-" .. random_file_name .. ".key"
+      until not file_exists(file_path)
       file = io.open(file_path, "w")
       if not file then error(string.format('unable to save SSH KEY to "%s" for configuration "%s"',file_path,config)) end
       data = base64_decode(_key_env)
@@ -134,11 +140,15 @@ for config in string.gmatch(configs,"[^,]+") do
 end
 print("CONFIGS:",idx-1)
 for i,v in ipairs(syncus) do
-  print(i,v.src,v.dst,v.mode,v.delay,v.maxdelays)
+  if v.mode == "SSH" then
+    print(i,v.src,v.dst .. ' (' .. v.user .. '@' .. v.host .. ':' .. v.port .. ' ' .. v.target .. ')',v.mode,v.delay,v.maxdelays)
+  else
+    print(i,v.src,v.dst,v.mode,v.delay,v.maxdelays)
+  end
   if #v.exclude > 0 then
-    print("EXCLUDES")
+    print("  EXCLUDES")
     for n,v in ipairs(v.exclude) do
-      print("  " .. v)
+      print("    " .. v)
     end
   end
 end
