@@ -1,0 +1,46 @@
+# 
+# Secret setup:
+# ssh-keygen -t ed25519 -C "SYNC" -N '' -f access.key
+# kubectl create secret generic sync-ssh-key --from-file=key=access.key
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wyga-lsyncd-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wyga-lsyncd
+  template:
+    metadata:
+      labels:
+        app: wyga-lsyncd
+    spec:
+      containers:
+      - name: wyga-lsyncd
+        image: wyga/lsyncd:v1
+        imagePullPolicy: Always
+        env:
+        - name: CONFIGS
+          value: "CONFIG1"
+        - name: SERVER
+          value: "ssh://backup@backup.example/~/magento-media"
+        - name: CONFIG1
+          value: "SRC:/sync DST:ENV:SERVER KEY:/private/ssh/key"
+        volumeMounts:
+        - name: sync-volume
+          mountPath: /sync
+          readOnly: true
+        - name: sync-ssh-key
+          mountPath: /private/ssh
+          readOnly: true
+      volumes:
+      - name: sync-volume
+        hostPath:
+          path: /opt/magento/media
+          type: Directory
+      - name: sync-ssh-key
+        secret:
+          secretName: sync-ssh-key
+          defaultMode: 256
