@@ -1,4 +1,4 @@
-# Lsynd as container
+# lsyncd as container
   
 Configuration via env:
 
@@ -29,4 +29,4 @@ Configuration via env:
   MAX-DELAYS: - configuration will aggregate events up to delay seconds or MAX-DELAYS separate uncollapsible events, which ever happens first. (by default 1000)
 ```
 
-See docker-compose.yaml for example
+See docker-compose.yml for example
